@@ -12,147 +12,130 @@ BLUE = (117, 187, 253)
 BROWN = (100, 25, 0)
 BOL = (95, 71, 27)
 
+GHOST_LINE = [(-0.267, -0.426), (-0.280, -0.339), (-0.328, -0.2), (-0.375, -0.104), (-0.395, -0.0348), (-0.436, 0.061),
+              (-0.476, 0.174), (-0.497, 0.313), (-0.443, 0.348), (-0.361, 0.357), (-0.274, 0.322), (-0.226, 0.391),
+              (-0.166, 0.452), (-0.091, 0.496), (0.01, 0.478), (0.037, 0.383), (0.084, 0.313), (0.159, 0.313),
+              (0.280, 0.322), (0.409, 0.287), (0.463, 0.261), (0.463, 0.226), (0.497, 0.122), (0.443, -0.061),
+              (0.361, -0.139), (0.328, -0.157), (0.253, -0.243), (0.206, -0.252), (0.111, -0.313), (0.078, -0.374),
+              (0.051, -0.426), (0.03, -0.461), (0.01, -0.496)]
+
+EYES = [(-0.256, -0.522), (-0.144, -0.533)]
+
 screen = pygame.display.set_mode((900, 750))
 screen.fill(BLACK)
-# screen = screen.convert_alpha(screen)
-
-# rect(screen, BLACK, (0, 300, 800, 400))
 rect(screen, GREY, (0, 0, 900, 300))
 
-scales = [(-0.2668918918918919, -0.4260869565217391), (-0.2804054054054054, -0.3391304347826087),
-          (-0.32770270270270274, -0.2),
-          (-0.375, -0.10434782608695652), (-0.3952702702702703, -0.034782608695652174),
-          (-0.43581081081081086, 0.06086956521739131),
-          (-0.4763513513513513, 0.17391304347826086), (-0.4966216216216216, 0.3130434782608696),
-          (-0.44256756756756754, 0.34782608695652173),
-          (-0.3614864864864865, 0.3565217391304348), (-0.2736486486486487, 0.3217391304347826),
-          (-0.22635135135135137, 0.391304347826087),
-          (-0.16554054054054054, 0.45217391304347826), (-0.09121621621621623, 0.4956521739130435),
-          (0.010135135135135129, 0.4782608695652174),
-          (0.03716216216216216, 0.3826086956521739), (0.08445945945945946, 0.3130434782608696),
-          (0.15878378378378377, 0.3130434782608696),
-          (0.2804054054054054, 0.3217391304347826), (0.40878378378378377, 0.28695652173913044),
-          (0.46283783783783783, 0.2608695652173913), (0.46283783783783783, 0.22608695652173913),
-          (0.4966216216216216, 0.12173913043478261), (0.44256756756756754, -0.06086956521739131),
-          (0.3614864864864865, -0.1391304347826087), (0.32770270270270274, -0.1565217391304348),
-          (0.2533783783783784, -0.24347826086956523), (0.20608108108108109, -0.25217391304347825),
-          (0.11148648648648649, -0.3130434782608696), (0.0777027027027027, -0.3739130434782609),
-          (0.05067567567567567, -0.4260869565217391), (0.0304054054054054, -0.4608695652173913),
-          (0.010135135135135129, -0.4956521739130435)]
 
-eyes = [(-0.25555555555555554, -0.5222222222222223), (-0.14444444444444443, -0.5333333333333333)]
+def cloud(coord, color, transparency):
+    """
+    Создаёт облако
+    :param coord: массив, содержащий геометрические параметры объекта: координаты левого верхнего угла и размеры
+    :param color: 2вет, заданный в формате, подходящем для pygame.Color
+    :param transparency: прозрачность от 0 до 255(0 - полностью прозрачное, 255 - полностью непрозрачное)
+    """
+    x, y, width, high = coord
+    surf = pygame.Surface((width, high))
+    surf.set_colorkey(BLACK)
+    surf.set_alpha(transparency)
+    ellipse(surf, color, (0, 0, width, high))
+    screen.blit(surf, (x, y))
 
 
-def ell(st, c, coord, fi):
-    a, b, w, h = coord
-    rotated_surf = pygame.Surface((w, h))  # создаём новый холст с заданным размером, на котором будем рисовать
-    rotated_surf = rotated_surf.convert_alpha(
-        rotated_surf)  # convert_alpha - имба, меняет формат холста чтобы прозрачность работала корректно
-    # rotated_surf.fill(pygame.Color(0, 0, 0, 0))  # ??? заливаем холст прозрачным бесцветьем (чёрный
-    # бесцветный==прозрачный)
-    ellipse(rotated_surf, c, (0, 0, w, h))  # рисуем нужную фигуру на нашем холсте
-    rotated_surf = pygame.transform.rotate(rotated_surf, fi)  # поворачиваем весь наш холст с нарисованной на нём
-    # фигуркой на заданный угол пр.ч.с.
-    st.blit(rotated_surf, (a, b))  # накладывает сверху на screen наш рисунокна холсте, левый верхний угол холста
-    # попадает в указанную точку
+def flare(surface, coord, angle):
+    """
+    Функция, создающая блик в галзу
+    :param coord: координата блика
+    :param angle: угол поворота блика против часовой стрелки
+    :param surface: полотно, на которое помещается блик глаза
+    """
+    x, y, width, high = coord
+    rotated_surf = pygame.Surface((width, high))
+    rotated_surf = rotated_surf.convert_alpha(rotated_surf)
+    ellipse(rotated_surf, WHITE, (0, 0, width, high))
+    rotated_surf = pygame.transform.rotate(rotated_surf, angle)
+    surface.blit(rotated_surf, (x, y))
 
 
-def ghost(st, x1, y1, w, h, ori):
-    if ori == 0:
-        print(ori)
-        x_c = x1 - 20 * w / 120
-        y_c = y1 - 55 * h / 120
-        circle(st, GREY, (x_c, y_c), 23 * h / 110)
-        coord = []
-        for a1, b1 in scales:
-            coord.append((a1 * w + x1, b1 * h + y1))
-        polygon(st, GREY, coord)
-        polygon(st, GREY, coord, width=4)
-        ell_s = 25
-        for a1, b1 in eyes:
-            circle(st, BLUE, (a1 * w + x1, b1 * h + y1), w / 21)
-            circle(st, BLACK, (a1 * w + x1, b1 * h + y1), w / 50)
-            ell(st, WHITE, (a1 * w + x1, b1 * h + y1 - w / 30, w / ell_s, 0.35 * w / ell_s), 35)
-    if ori == 1:
-        x_c = x1 + 20 * w / 120
-        y_c = y1 - 55 * h / 120
-        circle(st, GREY, (x_c, y_c), 23 * h / 110)
-        coord = []
-        for a1, b1 in scales:
-            coord.append((-a1 * w + x1, b1 * h + y1))
-        polygon(st, GREY, coord)
-        polygon(st, GREY, coord, width=4)
-        ell_s = 25
-        for a1, b1 in eyes:
-            circle(st, BLUE, (-a1 * w + x1, b1 * h + y1), w / 21)
-            circle(st, BLACK, (-a1 * w + x1, b1 * h + y1), w / 50)
-            ell(st, WHITE, (-a1 * w + x1 - w / 50, b1 * h + y1 - w / 30, w / ell_s, 0.35 * w / ell_s), -35)
+def ghost(coord, orientation, transparency=150):
+    """
+    Рисует приведение
+    :param coord: массив, содержащий геометрические параметры объекта: координаты левого верхнего угла и размеры
+    :param orientation: ориентация. 1, если налево, -1, если направо
+    :param transparency: transparency: прозрачность от 0 до 255(0 - полностью прозрачное, 255 - полностью непрозрачное)
+    :return:
+    """
+    x, y, width, high = coord
+    surf = pygame.Surface((width, high * 1.17))
+    surf.set_colorkey(BLACK)
+    surf.set_alpha(transparency)
+    x_c = width / 3
+    y_c = 23 / 110 * high
+    # Прорисовка головы
+    circle(surf, GREY, (x_c, y_c), 23 * high / 110)
+    # Прорисовка тела
+    coord = [(i[0] * width + 0.5 * width, i[1] * high + 0.67 * high) for i in GHOST_LINE]
+    polygon(surf, GREY, coord)
+    polygon(surf, GREY, coord, width=4)
+    # Прорисовка глаз
+    for a1, b1 in EYES:
+        circle(surf, BLUE, (a1 * width + 0.5 * width, b1 * high + 0.67 * high), width / 21)
+        circle(surf, BLACK, (a1 * width + 0.5 * width, b1 * high + 0.67 * high), width / 50)
+        flare(surf, (a1 * width + 0.5 * width, b1 * high + 0.67 * high - width / 30, width / 25, 0.35 * width / 25), 35)
+    screen.blit(surf if orientation == 1
+                else pygame.transform.flip(surf, True, False), (x - 0.5 * width, y - 0.67 * high))
 
 
-def house(st, x1, y1, w, h):
-    rect(st, BOL, (x1, y1, w, h))
-    rect(st, BROWN, (x1 + w / 10, y1 + h * 0.7, w / 5, h / 5))
-    rect(st, BROWN, (x1 + 4 * w / 10, y1 + h * 0.7, w / 5, h / 5))
-    rect(st, YELLOW, (x1 + 7 * w / 10, y1 + h * 0.7, w / 5, h / 5))
+def house(x, y, width, high):
+    """
+    Функция рисует дом
+    :param x:
+    :param y:
+    :param width:
+    :param high:
+    :return:
+    """
+    rect(screen, BOL, (x, y, width, high))
+    rect(screen, BROWN, (x + width / 10, y + high * 0.7, width / 5, high / 5))
+    rect(screen, BROWN, (x + 4 * width / 10, y + high * 0.7, width / 5, high / 5))
+    rect(screen, YELLOW, (x + 7 * width / 10, y + high * 0.7, width / 5, high / 5))
     for i in range(1, 5):
-        rect(st, (78, 78, 78), (x1 + 3 * i * w / 17, y1, w / 12, h / 3))
-    polygon(st, BROWN, [(x1-40, y1), (x1, y1-30), (x1+w, y1-30), (x1+w+40, y1)])
-    rect(st, BROWN, (x1-30, y1+h/2-20, 60+w, 20))
+        rect(screen, (78, 78, 78), (x + 3 * i * width / 17, y, width / 12, high / 3))
+    polygon(screen, BROWN, [(x - 40, y), (x, y - 30), (x + width, y - 30), (x + width + 40, y)])
+    rect(screen, BROWN, (x - 30, y + high / 2 - 20, 60 + width, 20))
     for i in range(1, 7):
-        rect(st, BROWN, (x1 - 45+i*40, y1+h/2-40, 10, 20))
-    rect(st, BROWN, (x1 - 20, y1 + h / 2 - 40, 40 + w, 10))
-    rect(st, BLACK, (x1+40, y1-75, 15, 65))
-    rect(st, BLACK, (x1 + 20, y1 - 55, 5, 35))
-    rect(st, BLACK, (x1 + 170, y1 - 60, 10, 45))
+        rect(screen, BROWN, (x - 45 + i * 40, y + high / 2 - 40, 10, 20))
+    rect(screen, BROWN, (x - 20, y + high / 2 - 40, 40 + width, 10))
+    rect(screen, BLACK, (x + 40, y - 75, 15, 65))
+    rect(screen, BLACK, (x + 20, y - 55, 5, 35))
+    rect(screen, BLACK, (x + 170, y - 60, 10, 45))
 
 
-def al(func, x1, y1, w, h, ori=None):
-    # print(ori)
-    st = pygame.Surface((1.5*w, 1.5*h))
-    st.set_colorkey(BLACK)
-    st.set_alpha(150)
-    if ori is not None:
-        func(st, w, h, w, h, ori=ori)
-    else:
-        func(st, w, h, w, h)
-    screen.blit(st, (x1, y1))
+def sky():
+    """
+    Функция сооздаёт небо
+    """
+    circle(screen, WHITE, (850, 50), 50)
+
+    cloud((240, 40, 350, 50), (78, 78, 78), 150)
+    cloud((500, 10, 400, 50), (138, 138, 138), 250)
+    cloud((250, 100, 400, 50), (138, 138, 138), 150)
+    cloud((150, 200, 350, 50), (78, 78, 78), 200)
 
 
-circle(screen, WHITE, (850, 50), 50)
+def draw():
+    house(50, 250, 200, 300)
+    house(350, 200, 200, 300)
+    house(650, 150, 200, 300)
 
-ell1 = pygame.Surface((350, 50))
-ell1.set_colorkey(BLACK)
-ell1.set_alpha(150)
-ellipse(ell1, (78, 78, 78), (0, 0, 350, 50))
-screen.blit(ell1, (250, 40))
+    ghost((727, 604, 190, 190), 1)
+    ghost((827, 574, 90, 90), 1)
+    ghost((150, 650, 90, 90), -1)
+    ghost((227, 524, 90, 90), -1)
 
-ell2 = pygame.Surface((400, 50))
-ell2.set_colorkey(BLACK)
-ell2.set_alpha(250)
-ellipse(ell2, (138, 138, 138), (0, 0, 400, 50))
-screen.blit(ell2, (500, 10))
-
-ell3 = pygame.Surface((400, 50))
-ell3.set_colorkey(BLACK)
-ell3.set_alpha(150)
-ellipse(ell3, (138, 138, 138), (0, 0, 400, 50))
-screen.blit(ell3, (250, 100))
+    sky()
 
 
-ghost(screen, 727, 654, 190, 190, 0)
-ghost(screen, 827, 524, 90, 90, 0)
-ghost(screen, 150, 650, 90, 90, 1)
-house(screen, 50, 250, 200, 300)
-
-house(screen, 350, 200, 200, 300)
-house(screen, 650, 150, 200, 300)
-
-ell2 = pygame.Surface((400, 50))
-ell2.set_colorkey(BLACK)
-ell2.set_alpha(200)
-ellipse(ell2, (138, 138, 138), (0, 0, 400, 50))
-screen.blit(ell2, (150, 200))
-al(ghost, 227, 524, 90, 90, 1)
+draw()
 
 pygame.display.update()
 clock = pygame.time.Clock()
