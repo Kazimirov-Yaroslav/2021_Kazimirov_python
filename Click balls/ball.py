@@ -1,5 +1,5 @@
 import pygame
-from pygame.draw import *
+from pygame.draw import circle
 from random import randint
 import random
 
@@ -16,10 +16,10 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self, color):
         pygame.sprite.Sprite.__init__(self)
         r = randint(15, 50)
-        surface = pygame.Surface((2*r, 2*r))
+        surface = pygame.Surface((2*r, 2*r), pygame.SRCALPHA)
         circle(surface, color, (r, r), r)
+        circle(surface, BLACK, (r, r), r, 10)
         self.image = surface
-        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = r
         self.color = color
