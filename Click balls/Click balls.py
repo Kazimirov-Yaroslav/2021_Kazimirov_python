@@ -92,7 +92,7 @@ def ask_name():
 
     name_player = ''
     input_box = pygame.Rect(100, 100, 140, 32)
-    text3 = font1.render('Введите своё имя:', True, WHITE)
+    enter_name = font1.render('Введите своё имя:', True, WHITE)
 
     active = False
     finished = False
@@ -120,7 +120,7 @@ def ask_name():
         input_box.w = width
         screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
         pygame.draw.rect(screen, color1, input_box, 2)
-        screen.blit(text3, (50, 70))
+        screen.blit(enter_name, (50, 70))
 
         pygame.display.flip()
         clock.tick(30)
@@ -163,12 +163,12 @@ def run():
 
         all_sprites.update()
 
-        screen.fill((255, 255, 255))
+        screen.fill(WHITE)
         screen.blit(background, (0, 0))
         all_sprites.draw(screen)
-        text2 = font1.render('Очки: ' + str(score), True, BLACK)
+        score_text = font1.render('Очки: ' + str(score), True, BLACK)
 
-        screen.blit(text2, (10, 10))
+        screen.blit(score_text, (10, 10))
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -183,11 +183,11 @@ def end():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 finished = True
-        screen.fill((255, 255, 255, 255))
+        screen.fill(WHITE)
         screen.blit(background, (0, 0))
         screen.blit(wizard, (500, 300))
-        text2 = font2.render('ИДИ БОТАЙ', True, RED)
-        screen.blit(text2, (100, 100))
+        end_text = font2.render('ИДИ БОТАЙ', True, RED)
+        screen.blit(end_text, (100, 100))
 
         pygame.display.flip()
 
