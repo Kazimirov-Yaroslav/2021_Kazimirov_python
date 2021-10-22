@@ -90,7 +90,7 @@ def ask_name():
     color_active = DODGER_BLUE
     color1 = color_inactive
 
-    name = ''
+    name_player = ''
     input_box = pygame.Rect(100, 100, 140, 32)
     text3 = font1.render('Введите своё имя:', True, WHITE)
 
@@ -111,11 +111,11 @@ def ask_name():
                     if event.key == pygame.K_RETURN:
                         finished = True
                     elif event.key == pygame.K_BACKSPACE:
-                        name = name[:-1]
+                        name_player = name_player[:-1]
                     else:
-                        name += event.unicode
+                        name_player += event.unicode
         screen.fill(BLACK)
-        txt_surface = font1.render(name, True, color1)
+        txt_surface = font1.render(name_player, True, color1)
         width = max(200, txt_surface.get_width() + 10)
         input_box.w = width
         screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
@@ -124,7 +124,7 @@ def ask_name():
 
         pygame.display.flip()
         clock.tick(30)
-    return name
+    return name_player
 
 
 def run():
@@ -155,7 +155,6 @@ def run():
                         balls_create(1)
                 for sprite in amogus:
                     a, b = pygame.mouse.get_pos()
-                    x, y = sprite.rect.center
                     if sprite.rect.collidepoint((a, b)) and type(sprite) == Target:
                         score += 15
                         print(score)
@@ -219,4 +218,3 @@ if __name__ == "__main__":
     end()
 
     pygame.quit()
-
