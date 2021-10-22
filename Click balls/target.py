@@ -6,8 +6,8 @@ import pygame.image
 
 
 class Target(pygame.sprite.Sprite):
-    def __init__(self, filename,  r=None):
-        pygame.sprite.Sprite.__init__(self)
+    def __init__(self, filename, *groups):
+        super().__init__(*groups)
         self.image = pygame.image.load(filename)
         self.image.set_colorkey((248, 248, 248, 255))
         self.rect = self.image.get_rect()

@@ -13,8 +13,8 @@ BLACK = (0, 0, 0)
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, color):
-        pygame.sprite.Sprite.__init__(self)
+    def __init__(self, color, *groups):
+        super().__init__(*groups)
         r = randint(15, 50)
         surface = pygame.Surface((2*r, 2*r), pygame.SRCALPHA)
         circle(surface, color, (r, r), r)
