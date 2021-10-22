@@ -57,6 +57,7 @@ def tables(file1, file2, name_player, score):
     :param name_player: name player
     :param file1: draft
     :param file2: original
+    :param score: player's score
     """
     points = []
     table = open(file2, 'w')
