@@ -3,10 +3,13 @@ from random import choice, randint
 import pygame
 from pygame.draw import rect
 from pygame.image import load
+from pygame.color import update
+import targets
+
 
 FPS = 30
 
-RED = 0xFF0000
+RED = (255, 0, 0, 0)
 BLUE = 0x0000FF
 YELLOW = 0xFFC91F
 GREEN = 0x00FF00
@@ -40,7 +43,7 @@ class Ball:
         self.live = 30
         self.t = 15/FPS
 
-    def norm(self):
+    def default_move(self):
         self.x += self.vx * self.t
         self.y += -self.vy * self.t + self.g*(self.t**2)/2
         self.vy -= self.g * self.t
@@ -53,7 +56,7 @@ class Ball:
         и стен по краям окна (размер окна 800х600).
         """
 
-        self.norm()
+        self.default_move()
         if self.y >= 500:
             self.y = 500
             self.vy = -0.6 * self.vy
@@ -93,17 +96,16 @@ class Ball:
 
 
 class Gun:
-    def __init__(self):
+    def __init__(self, filename):
         """
         :param self.color: Цвет пушки
         """
         self.f2_power = 10
         self.f2_on = 0
         self.an = 1
-        gun_image = load('vacuum gun.png')
-        self.image = gun_image
-        self.rect = self.image.get_
-
+        self.gun_image = load(filename)
+        self.image = self.gun_image
+        self.rect = self.image.get_rect()
 
     def fire2_start(self):
         self.f2_on = 1
@@ -133,16 +135,14 @@ class Gun:
                 self.an = math.atan((event.pos[1]-450) / (event.pos[0]-40))
             except ZeroDivisionError:
                 pass
-        if self.f2_on:
-            self.color = RED
-        else:
-            self.color = GREY
 
     def draw(self):
-        self.image.fill(WHITE)
-        rect(self.image, self.color, (1, 0, 10 + self.f2_power, 10))
-        image = pygame.transform.rotate(self.image, math.degrees(-self.an))
-        screen.blit(image, (30, 450))
+        self.image = load('vacuum gun.png')
+        self.image.set_colorkey(WHITE)
+        self.image = pygame.transform.rotate(self.image, math.degrees(-self.an))
+        self.rect = self.image.get_rect(center=(150, 500))
+        screen.blit(self.image, self.rect)
+
 
         # FIXIT don't know how to do it
 
@@ -150,9 +150,6 @@ class Gun:
         if self.f2_on:
             if self.f2_power < 100:
                 self.f2_power += 3
-            self.color = RED
-        else:
-            self.color = GREY
 
 
 class Target:
@@ -164,7 +161,7 @@ class Target:
         self.y = randint(300, 500)
         self.r = randint(5, 50)
         self.color = RED
-        # FIXME: don't work!!! How to call this functions when object is created?
+        # FIXME: don't work!!! How to call th,  functions wh.000bject is created?
 
     def hit(self, points=1):
         """Попадание шарика в цель."""
@@ -178,7 +175,7 @@ class Game:
     def __init__(self):
         self.bullet = 0
         self.balls = []
-        self.gun = Gun()
+        self.gun = Gun('vacuum gun.png')
         self.target = Target()
 
     def mainloop(self):
@@ -224,6 +221,20 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     game = Game()
     game.mainloop()
+
+
+def fill(surface, color, saturation):
+    """Fill all pixels of the surface with color, preserve transparency."""
+    w, h = surface.get_size()
+    r, g, b, _ = color
+    r = int(r*saturation/10)
+    g = int(g*saturation/10)
+    b = int(b*saturation/10)
+    for x in range(w):
+        for y in range(h):
+            r1, g1, b1, a = surface.get_at((x, y))
+            color1 = (min(r1+r, 255), min(g1+g, 255), min(b1+b, 255), a)
+            surface.set_at((x, y), color1)
 
 
 if __name__ == '__main__':
