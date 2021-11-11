@@ -5,17 +5,6 @@ from random import randint
 WHITE = 0xFFFFFF
 
 
-class HealTarget(pygame.sprite.Sprite):
-    """
-    Хилит при попадании
-    """
-    def move(self):
-        """
-        Двигается по горизонтали
-        """
-        pass
-
-
 class Airplane(pygame.sprite.Sprite):
     """
     Класс самолета, который скидывает бомбы.
