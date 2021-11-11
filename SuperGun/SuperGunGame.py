@@ -36,9 +36,6 @@ class Game:
         self.count = str(self.score)
         self.score_text = self.font2.render(self.count, True, RED)
         self.f1 = pygame.font.Font(None, 36)
-        self.text1 = self.f1.render('Очки:', True, 'black')
-        self.text5 = self.f1.render('Все ваши танки умерли!', True, 'black')
-        self.your_score = self.f1.render('Ваш счёт:', True, 'black')
         self.tank1 = self.f1.render('Танк 1:', True, 'green3')
 
     def make_text(self):
