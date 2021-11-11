@@ -1,33 +1,24 @@
-import math
-from random import choice, randint
 import pygame
-from pygame.draw import rect
 from pygame.image import load
-from pygame.color import update
 import tanks
 import bullet
 import targets
 
 
 FPS = 30
-RED = (255, 0, 0, 0)
-BLUE = 0x0000FF
-YELLOW = 0xFFC91F
-GREEN = 0x00FF00
-MAGENTA = 0xFF03B8
-CYAN = 0x00FFCC
-BLACK = (0, 0, 0)
 WHITE = 0xFFFFFF
-GREY = 0x7D7D7D
-GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
-
+RED = (255, 0, 0)
+background = load('XXXL.jpg')
+wizard = load('C__fakepath_400px-Колдунов_Леонид_Модестович.png')
+wizard.set_colorkey((255, 255, 255))
 WIDTH = 800
 HEIGHT = 600
 
 
 class Game:
     def __init__(self):
-        self.score = 0
+        font2 = pygame.font.Font(None, 100)
+        self.end_text = font2.render('ИДИ БОТАЙ', True, RED)
         self.tank = tanks.Tank('tanks_tankGreen_body3.png')
         self.airplane = targets.Airplane('airplan_r.png')
         self.bullets = pygame.sprite.Group()
@@ -38,6 +29,49 @@ class Game:
         for _ in range(5):
             t = targets.Coin('star coin 1.png')
             self.targets.add(t)
+        self.score = 0
+        self.count = str(self.score)
+        self.f1 = pygame.font.Font(None, 36)
+        self.text1 = self.f1.render('Очки:', True, 'black')
+        self.text5 = self.f1.render('Все ваши танки умерли!', True, 'black')
+        self.your_score = self.f1.render('Ваш счёт:', True, 'black')
+        self.tank1 = self.f1.render('Танк 1:', True, 'green3')
+
+    def make_text(self):
+        screen.blit(self.text1, (10, 10))
+        screen.blit(self.f1.render(self.count, True, 'black'), (84, 10))
+        screen.blit(self.tank1, (300, 10))
+        screen.blit(self.f1.render(str(self.tank.live), True, 'green3'), (390, 10))
+
+    def manual(self):
+        introduction = self.f1.render('В этой игре вам предстоит сбивать цели с помощью танков', True, 'black')
+        screen.blit(introduction, (20, 20))
+        introduction = self.f1.render('У каждого танка 50 жизней, уклоняйтесь от падающих бомб', True, 'black')
+        screen.blit(introduction, (20, 50))
+        introduction = self.f1.render('Управление:', True, 'black')
+        screen.blit(introduction, (20, 80))
+        introduction = self.f1.render('Стрелки вправо и влево - движение танков', True, 'black')
+        screen.blit(introduction, (20, 110))
+        introduction = self.f1.render('Цифры 1 и 2 - переключение между видами снарядов ', True, 'black')
+        screen.blit(introduction, (20, 140))
+        introduction = self.f1.render('Space - огонь', True, 'black')
+        screen.blit(introduction, (20, 200))
+        introduction = self.f1.render('Количество очков за раунд: 10 - кол-во выстрелов', True, 'black')
+        screen.blit(introduction, (20, 230))
+        introduction = self.f1.render('Для начала игры нажмите крестик', True, 'black')
+        screen.blit(introduction, (20, 300))
+
+    def manual_window(self):
+        finished = False
+        clock = pygame.time.Clock()
+        while not finished:
+            screen.fill(WHITE)
+            self.manual()
+            pygame.display.update()
+            clock.tick(FPS)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    finished = True
 
     def mainloop(self):
         clock = pygame.time.Clock()
@@ -45,6 +79,7 @@ class Game:
 
         while not finished:
             screen.fill(WHITE)
+            self.count = str(self.score)
             self.tank.draw(screen)
             for b in self.bullets:
                 b.draw(screen)
@@ -57,6 +92,7 @@ class Game:
                     self.bombs.add(bomb)
             for bomb in self.bombs:
                 bomb.draw(screen)
+            self.make_text()
 
             pygame.display.update()
             keys = pygame.key.get_pressed()
@@ -74,9 +110,9 @@ class Game:
                         self.bullets.add(new_bullet)
 
             if keys[pygame.K_x]:
-                self.tank.gun.gun_turn('K_x', screen, self.tank.x, self.tank.y)
+                self.tank.gun.gun_turn('K_x', screen, self.tank.get_center_x(), self.tank.get_center_y())
             if keys[pygame.K_z]:
-                self.tank.gun.gun_turn('K_z', screen, self.tank.x, self.tank.y)
+                self.tank.gun.gun_turn('K_z', screen, self.tank.get_center_x(), self.tank.get_center_y())
             if keys[pygame.K_LEFT]:
                 self.tank.move_l()
             if keys[pygame.K_RIGHT]:
@@ -100,12 +136,28 @@ class Game:
                 self.airplanes.add(a)
                 self.score += 10
             pygame.sprite.groupcollide(self.bombs, self.bullets, True, True)
+
             hits = pygame.sprite.spritecollide(self.tank, self.bombs, True)
             if hits:
                 self.tank.live -= 1
+            if self.tank.live <= 0:
+                finished = True
 
         print(self.score)
         print(self.tank.live)
+
+    def end_window(self):
+        finished = False
+        while not finished:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    finished = True
+            screen.fill(WHITE)
+            screen.blit(background, (0, 0))
+            screen.blit(wizard, (500, 300))
+            screen.blit(self.end_text, (100, 100))
+
+            pygame.display.flip()
 
         pygame.quit()
 
@@ -115,7 +167,9 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     game = Game()
+    game.manual_window()
     game.mainloop()
+    game.end_window()
 
 
 if __name__ == '__main__':

@@ -1,22 +1,26 @@
 import math
-from random import choice, randint
 import pygame
-from pygame.draw import rect
 from pygame.image import load
-from pygame.color import update
 import bullet
 
 WHITE = 0xFFFFFF
 FPS = 30
 
 
-def coord(x, y, l, angel):
-    return x+l*math.cos(math.radians(angel)), y-l*math.sin(math.radians(angel))
+def coord(x, y, length, angel):
+    """
+    Функция для вычисления координаты пули при выстреле относительнодула пушки.
+    """
+    return x+length*math.cos(math.radians(angel)), y-length*math.sin(math.radians(angel))
 
 
 class Gun(pygame.sprite.Sprite):
+    """
+    Класс пушки танка.
+    """
     def __init__(self, filename):
         """
+
         """
         self.f2_power = 10
         self.f2_on = 0
@@ -27,16 +31,18 @@ class Gun(pygame.sprite.Sprite):
         self.angel_bul = 0
 
     def fire2_start(self):
+        """
+        Активация пушки.
+        """
         self.f2_on = 1
 
     def fire2_end(self):
         """
-        Выстрел мячом.
-
+        Выстрел пулей.
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
-        x1, y1 = coord(self.rect.center[0], self.rect.center[1], 75, self.angel)
+        x1, y1 = coord(self.rect.centerx, self.rect.centery, 75, self.angel)
         new_bullet = bullet.Bullet('cannon ball.png', x1, y1, FPS)
         new_bullet.vx = self.f2_power * math.cos(math.radians(self.angel))
         new_bullet.vy = self.f2_power * math.sin(math.radians(self.angel))
@@ -44,9 +50,16 @@ class Gun(pygame.sprite.Sprite):
         self.f2_power = 10
         return new_bullet
 
+    def fix_gun(self, x, y):
+        """
+        Фиксация центра пушки при перемещении вместе с телом танка.
+        """
+        self.rect = self.image.get_rect(center=(x + 1, y - 48))
+
     def targetting(self, key):
         """
-        Прицеливание.
+        В зависимости от клавиши возвращает, как поворачивать пушку или уже нельзя повернуть.
+        :param key: Передает, какая клавиша нажата.
         """
         if 0 < self.angel < 180:
             if key == 'K_z':
@@ -63,46 +76,77 @@ class Gun(pygame.sprite.Sprite):
                 self.angel += 5
             return True
 
-        # FIXIT don't know how to do it
-
     def power_up(self):
+        """
+        Функция увеличения мощности пушки при длительном зажатии клавиши выстрела.
+        """
         if self.f2_on == 1:
             if self.f2_power < 100:
                 self.f2_power += 3
 
     def gun_turn(self, key, screen, x, y):
+        """
+        Функция поворота пушки при нажатии клавиши.
+        :param key: Передает, какая клавиша нажата.
+        :param screen: Передает поверхность, на которой происходит отрисовка пушки.
+        :param x: Координаты центра пушки
+        :param y: Координаты центра пушки
+        """
         if self.targetting(key):
             self.image = load('vacuum gun.png')
             self.image.set_colorkey(WHITE)
             self.image = pygame.transform.rotate(self.image, self.angel)
-            self.rect = self.image.get_rect(center=(x+85, y+5))
+            self.fix_gun(x, y)
             screen.blit(self.image, self.rect)
 
 
 class Tank(pygame.sprite.Sprite):
+    """
+    Класс танка.
+    """
     def __init__(self, filename, *groups):
         super().__init__(*groups)
         self.image = load(filename)
-        self.x = 100
-        self.y = 500
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+        self.rect = self.image.get_rect(center=(100, 500))
         self.live = 50
+        """
+        Параметры танка.
+        """
 
         self.gun = Gun('vacuum gun.png')
         self.gun.image = pygame.transform.rotate(self.gun.image, 90)
-        self.gun.rect = self.gun.image.get_rect(center=(self.x+85, self.y+5))
+        self.gun.fix_gun(self.rect.centerx, self.rect.centery)
+        """
+        Параметры пушки,котороя создается вместе с танкоми прявязана только к нему.
+        """
+
+    def get_center_x(self):
+        return self.rect.centerx
+
+    def get_center_y(self):
+        return self.rect.centery
 
     def move_r(self):
-        self.x += 5
-        self.gun.rect = self.gun.image.get_rect(center=(self.x + 85, self.y + 5))
+        """
+        Движение всего танка вправо.
+        """
+        if self.rect.right >= 800:
+            return
+        self.rect.x += 5
+        self.gun.fix_gun(self.rect.centerx, self.rect.centery)
 
     def move_l(self):
-        self.x -= 5
-        self.gun.rect = self.gun.image.get_rect(center=(self.x + 85, self.y + 5))
+        """
+        Движение всего танка влево.
+        """
+        if self.rect.x <= 0:
+            return
+        self.rect.x -= 5
+        self.gun.fix_gun(self.rect.centerx, self.rect.centery)
 
     def draw(self, screen):
-        self.rect = self.image.get_rect(center=(self.x, self.y))
-        screen.blit(self.gun.image, self.gun.image.get_rect(center=(self.x+85, self.y+5)))
-        screen.blit(self.image, (self.x, self.y))
-
-
+        """
+        Отрисовка танка.
+        """
+        screen.blit(self.gun.image, self.gun.rect)
+        screen.blit(self.image, self.rect)
